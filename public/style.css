@@ -1,0 +1,1281 @@
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #ECF0F1; /* 明るいグレーを背景に */
+    margin: 0;
+    overflow: hidden; /* 画面全体のスクロールを禁止 */
+    color: #2C3E50; /* 基本のテキスト色を濃い青に */
+}
+
+/* ヘッダー */
+.app-header {
+    width: 100%;
+    height: 2vh;
+    background-color: #2C3E50; /* 濃い青をヘッダーの背景に */
+    color: #ECF0F1; /* 明るいグレーをテキスト色に */
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 影を強調 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1001;
+}
+
+.header-title {
+    margin: 0 auto;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+/* ハンバーガーメニューボタン */
+.hamburger-menu {
+    width: 30px;
+    height: 25px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    z-index: 1002;
+}
+
+.hamburger-menu .line {
+    width: 100%;
+    height: 3px;
+    background-color: #ECF0F1; /* 明るいグレーをラインの色に */
+    transition: all 0.3s ease;
+}
+
+/* ハンバーガーメニューのアニメーション */
+.hamburger-menu.open .line:nth-child(1) {
+    transform: translateY(11px) rotate(45deg);
+}
+
+.hamburger-menu.open .line:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-menu.open .line:nth-child(3) {
+    transform: translateY(-11px) rotate(-45deg);
+}
+
+/* サイドメニュー */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -250px; /* 初期状態は隠す */
+    width: 250px;
+    height: 100%;
+    background-color: #2C3E50; /* 濃い青をサイドメニューの背景に */
+    padding-top: 80px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3); /* 影を強調 */
+    transition: left 0.3s ease;
+    z-index: 1000;
+}
+
+.side-menu.open {
+    left: 0; /* 開いた状態 */
+}
+
+.side-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.side-menu ul li {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* 区切り線を薄く */
+}
+
+.side-menu ul li:last-child {
+    border-bottom: none;
+}
+
+.side-menu a {
+    display: block;
+    padding: 15px 20px;
+    color: #ECF0F1; /* 明るいグレーをリンクの色に */
+    text-decoration: none;
+    font-size: 1.2em;
+    transition: background-color 0.2s;
+}
+
+.side-menu a:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* ホバー時の背景色を薄く */
+}
+
+.side-menu a.active {
+    background-color: #1ABC9C; /* ターコイズをアクティブなメニューの色に */
+    font-weight: bold;
+}
+
+/* オーバーレイ */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* オーバーレイを少し濃く */
+    z-index: 999;
+    display: none;
+}
+
+.overlay.active {
+    display: block;
+}
+
+/* POSコンテナの調整 (ヘッダーと重ならないように) */
+.pos-container {
+    display: flex;
+    background-color: #ECF0F1; /* 明るいグレーをパネルの背景に */
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); /* 影を強調 */
+    overflow: hidden;
+    padding: 20px;
+    margin-top: 0.1vh; /* ヘッダーの高さ分下げる */
+    margin-bottom: 40px;
+    border: 1px solid #BDC3C7; /* わずかなボーダーを追加して立体感を */
+    position: absolute; /* 画面に対して固定 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 中央配置 */
+    /* 横画面時のデフォルト値 */
+    width: 80vw; /* 横画面の幅 */
+    height: 80vh; /* 横画面の高さ */
+    max-width: 1280px; /* 必要に応じて最大幅を設定 */
+}
+
+/* 注文リストパネル */
+.order-panel {
+    width: 35%; /* pos-containerの35% */
+    min-width: 300px;
+    padding: 20px;
+    border-right: 1px solid #BDC3C7; /* 中間グレーのボーダー */
+    display: flex;
+    flex-direction: column;
+}
+
+.table-number-container {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+}
+
+.table-number-container label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.table-number-container input {
+    width: 80px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.order-title {
+    font-size: 1.8em;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2C3E50; /* 濃い青をタイトル色に */
+    border-bottom: 2px solid #BDC3C7; /* 中間グレーの区切り線 */
+    padding-bottom: 10px;
+}
+
+.order-list {
+    flex-grow: 1;
+    overflow-y: auto; /* 注文リストをスクロール可能に */
+    margin-bottom: 20px;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed #BDC3C7; /* 中間グレーの点線 */
+}
+
+.item-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #34495E; /* 少し暗い青をアイテム名に */
+    flex-grow: 1;
+}
+
+.item-quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.quantity-button {
+    background-color: #BDC3C7; /* 中間のグレーをボタンに */
+    border: none;
+    border-radius: 4px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: #2C3E50; /* 濃い青をテキスト色に */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* ボタンにも影 */
+}
+
+.quantity-button:hover {
+    background-color: #AAB7B8; /* ホバーで少し暗く */
+}
+
+.quantity-display {
+    width: 30px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #2C3E50; /* 濃い青をテキスト色に */
+}
+
+.order-summary {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: left;
+    padding-top: 15px;
+    border-top: 2px solid #BDC3C7; /* 中間グレーの区切り線 */
+    margin-top: auto;
+    color: #2C3E50; /* 濃い青をサマリー色に */
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.btn {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* ボタンにも影 */
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-cancel {
+    background-color: #ff6b6b; /* 以前の赤に戻す */
+    color: white;
+    margin-right: 10px;
+}
+
+.btn-cancel:hover {
+    background-color: #e05c5c; /* 以前の赤のホバー色に戻す */
+}
+
+.btn-pay {
+    background-color: #4CAF50; /* 以前の緑に戻す */
+    color: white;
+    margin-left: 10px;
+}
+
+.btn-pay:hover {
+    background-color: #45a049; /* 以前の緑のホバー色に戻す */
+}
+
+/* テーブル番号選択画面 */
+.table-select-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(44, 62, 80, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.table-select-screen.hidden {
+    display: none;
+}
+
+.table-select-container {
+    background-color: #ECF0F1;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    color: #2C3E50;
+}
+
+.table-number-display {
+    font-size: 2em;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+    min-height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.table-select-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.btn-confirm {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-confirm:hover {
+    background-color: #45a049;
+}
+
+
+/* 商品選択パネル */
+.menu-panel {
+    width: 65%; /* pos-containerの65% */
+    min-width: 500px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #F8F9FA; /* メニューパネルは少し明るい背景に */
+    overflow-y: auto; /* menu-panelをスクロール可能に */
+}
+
+.product-group {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.product-category-button,
+.product-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #BDC3C7; /* ボーダーの色を中間グレーに */
+    border-radius: 8px;
+    font-size: 0.95em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+    aspect-ratio: 1 / 1;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    color: #2C3E50; /* 濃い青をテキスト色に */
+    white-space: normal; /* テキストの折り返しを許可 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 5px;
+    min-width: 60px;
+}
+
+.product-category-button {
+    color: white;
+    box-shadow: none;
+    border: none;
+    flex-shrink: 0;
+}
+
+/* カテゴリボタンの色 (新しいパレットから適用) */
+.product-category-button.red {
+    background-color: #1A99BC; /* パレットの赤 */
+}
+.product-category-button.blue {
+    background-color: #1ABC9C; /* パレットのターコイズ */
+}
+.product-category-button.orange {
+    background-color: #9CBC1A; /* パレットの鮮やかなオレンジ */
+}
+.product-category-button.green {
+    background-color: #F1C40F; /* パレットのマスタードイエローを適用 (緑の代わり) */
+}
+
+.product-button:hover {
+    background-color: #BDC3C7; /* ホバー色を中間グレーに */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* 空のボタンのスタイル */
+.product-button.empty {
+    border: none;
+    box-shadow: none;
+    cursor: default;
+    background-color: transparent;
+}
+.product-button.empty.transparent {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+.product-button.empty:hover {
+    background-color: transparent;
+    box-shadow: none;
+    transform: none;
+}
+
+/* 支払い画面 */
+.payment-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(44, 62, 80, 0.8); /* 濃い青の透明色を背景に */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.payment-screen.hidden {
+    display: none;
+}
+
+.payment-container {
+    background-color: #ECF0F1; /* 明るいグレーを背景に */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 500px;
+    text-align: center;
+    color: #2C3E50; /* 濃い青をテキスト色に */
+}
+
+.payment-total {
+    font-size: 2em;
+    margin-bottom: 25px;
+    color: #0f0f0f; /* 鮮やかなオレンジを合計金額に */
+}
+
+.payment-table-number {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #34495E;
+}
+
+.payment-details {
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #34495E;
+}
+
+.number-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.num-key {
+    background-color: #BDC3C7; /* 中間グレー */
+    border: none;
+    border-radius: 8px;
+    padding: 20px 0;
+    font-size: 1.8em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    color: #2C3E50; /* 濃い青をテキスト色に */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.num-key:hover {
+    background-color: #AAB7B8;
+}
+
+.num-key:active {
+    transform: translateY(1px);
+}
+
+.payment-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.payment-btn {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.payment-btn:active {
+    transform: translateY(1px);
+}
+
+.btn-cancel-payment {
+    background-color: #ff6b6b; /* 以前の赤に戻す */
+    color: white;
+    margin-right: 10px;
+}
+
+.btn-cancel-payment:hover {
+    background-color: #e05c5c; /* 以前の赤のホバー色に戻す */
+}
+
+.btn-complete {
+    background-color: #4CAF50; /* 以前の緑に戻す */
+    color: white;
+    margin-left: 10px;
+}
+
+.btn-complete:hover {
+    background-color: #45a049; /* 以前の緑のホバー色に戻す */
+}
+
+
+/* 履歴ページのスタイル */
+.history-container {
+    background-color: #ECF0F1;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    width: 80%;                /* pos-containerと同じ幅 */
+    max-width: 1280px;         /* pos-containerと同じ最大幅 */
+    margin-top: 0.1vh;         /* pos-containerと同じmargin-top */
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;              /* pos-containerと同じ高さ */
+    border: 1px solid #BDC3C7;
+    position: fixed;           /* 画面中央に固定 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 中央配置 */
+    overflow-y: auto;
+    z-index: 100;              /* 必要に応じてpos-containerと同じに */
+}
+
+.history-title {
+    font-size: 2em;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2C3E50;
+    border-bottom: 2px solid #BDC3C7;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.order-history-list {
+    flex-grow: 1;
+    overflow-y: auto; /* 注文履歴をスクロール可能に */
+    margin-bottom: 20px;
+    border: 1px solid #BDC3C7;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #FAFCFD; /* 少し明るいグレーをリスト背景に */
+}
+
+.history-item {
+    background-color: #FFFFFF; /* 白をアイテムの背景に */
+    border: 1px solid #BDC3C7; /* 中間グレーのボーダー */
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #BDC3C7;
+}
+
+.history-date {
+    font-size: 0.9em;
+    color: #7F8C8D; /* 暗めのグレー */
+}
+
+.history-table {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #34495E;
+}
+
+.history-total {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #0F0F0F; /* 鮮やかなオレンジ */
+}
+
+.history-items-detail {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.history-items-detail li {
+    font-size: 0.95em;
+    color: #34495E;
+    padding: 3px 0;
+}
+
+.history-actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.btn-back {
+    background-color: #7F8C8D; /* 暗めのグレー */
+    color: white;
+    padding: 10px 20px;
+    font-size: 1.1em;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn-back:hover {
+    background-color: #6C7A89;
+}
+
+/* --- 提供状況ページのスタイル --- */
+.kitchen-container {
+    background-color: #ECF0F1;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    width: 80%;
+    max-width: 1280px;
+    margin-top: 0.1vh;
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    border: 1px solid #BDC3C7;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.kitchen-title {
+    font-size: 2em;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2C3E50;
+    border-bottom: 2px solid #BDC3C7;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.kitchen-order-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+    background-color: #FAFCFD;
+}
+
+.kitchen-order-item {
+    background-color: #FFFFFF;
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.kitchen-order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #BDC3C7;
+}
+
+.order-time {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #34495E;
+}
+
+.order-table {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #0F0F0F;
+}
+
+.kitchen-item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.kitchen-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed #D5DBDB;
+    font-size: 1em;
+    color: #34495E;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.kitchen-item:last-child {
+    border-bottom: none;
+}
+
+.kitchen-item:hover {
+    background-color: #F0F0F0;
+}
+
+.item-name {
+    flex-grow: 1;
+}
+
+.item-status {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+}
+
+.status-pending .item-status {
+    background-color: #F39C12; /* オレンジ */
+}
+
+.status-delivered .item-status {
+    background-color: #27AE60; /* 緑 */
+}
+
+.status-cancelled .item-status {
+    background-color: #E74C3C; /* 赤 */
+}
+
+/* --- 注文管理ページのスタイル --- */
+.order-management-container {
+    background-color: #ECF0F1;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    width: 80%;
+    max-width: 1280px;
+    margin-top: 0.1vh;
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    border: 1px solid #BDC3C7;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.order-management-title {
+    font-size: 2em;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2C3E50;
+    border-bottom: 2px solid #BDC3C7;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.filter-buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.filter-btn {
+    padding: 10px 20px;
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+    background-color: #F8F9FA;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    font-weight: bold;
+    color: #34495E;
+}
+
+.filter-btn:hover {
+    background-color: #E0E0E0;
+}
+
+.filter-btn.active {
+    background-color: #1ABC9C;
+    color: white;
+    border-color: #1ABC9C;
+}
+
+.order-management-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+    background-color: #FAFCFD;
+}
+
+.order-management-item {
+    background-color: #FFFFFF;
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    cursor: pointer; /* タップでステータス変更のため */
+    transition: background-color 0.2s;
+}
+
+.order-management-item:hover {
+    background-color: #F0F0F0;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #BDC3C7;
+}
+
+.item-time {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #34495E;
+}
+
+.item-table {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #0F0F0F;
+}
+
+.item-details {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-name {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #34495E;
+    flex-grow: 1;
+}
+
+.item-status-text {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+}
+
+.status-pending .item-status-text {
+    background-color: #F39C12; /* オレンジ */
+}
+
+.status-delivered .item-status-text {
+    background-color: #27AE60; /* 緑 */
+}
+
+.status-cancelled .item-status-text {
+    background-color: #E74C3C; /* 赤 */
+}
+
+
+/* --- メニュー設定ページのスタイル --- */
+.menu-settings-container {
+    background-color: #ECF0F1;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    width: 80%;
+    max-width: 800px; /* メニュー設定画面の最大幅を調整 */
+    margin-top: 0.1vh;
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    border: 1px solid #BDC3C7;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.settings-title {
+    font-size: 2em;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2C3E50;
+    border-bottom: 2px solid #BDC3C7;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.settings-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed #BDC3C7;
+}
+
+.settings-section:last-of-type {
+    border-bottom: none;
+}
+
+.settings-section h3 {
+    font-size: 1.5em;
+    color: #34495E;
+    margin-bottom: 15px;
+}
+
+.menu-item-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    align-items: center;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.9em;
+    margin-bottom: 5px;
+    color: #34495E;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group select {
+    padding: 10px;
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+    font-size: 1em;
+    width: 100%;
+    box-sizing: border-box; /* paddingを含めて幅を計算 */
+}
+
+.form-actions {
+    grid-column: span 2; /* フォームの幅いっぱいに広げる */
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn-add {
+    background-color: #1ABC9C; /* ターコイズ */
+    color: white;
+    padding: 10px 20px;
+    font-size: 1.1em;
+}
+
+.btn-add:hover {
+    background-color: #16A085;
+}
+
+
+.current-menu-items {
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #FAFCFD;
+    max-height: 300px; /* スクロール可能にする */
+    overflow-y: auto;
+}
+
+.current-menu-items h4 {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    color: #2C3E50;
+    font-size: 1.2em;
+    border-bottom: 1px solid #BDC3C7;
+    padding-bottom: 5px;
+}
+
+.current-menu-items h4:first-of-type {
+    margin-top: 0;
+}
+
+
+.menu-list-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-list-items li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed #D5DBDB;
+    font-size: 1em;
+    color: #34495E;
+}
+
+.menu-list-items li:last-child {
+    border-bottom: none;
+}
+
+.item-actions .btn {
+    padding: 5px 10px;
+    font-size: 0.9em;
+    margin-left: 5px;
+    border-radius: 5px;
+    box-shadow: none; /* 小さいボタンなので影を削除 */
+}
+
+.btn-edit {
+    background-color: #3498DB; /* 青 */
+    color: white;
+}
+
+.btn-edit:hover {
+    background-color: #2980B9;
+}
+
+.btn-delete {
+    background-color: #E74C3C; /* 赤 */
+    color: white;
+}
+
+.btn-delete:hover {
+    background-color: #C0392B;
+}
+
+.settings-actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+
+/* レスポンシブ対応 */
+@media (orientation: portrait) { /* 縦画面のとき */
+    body {
+        overflow: hidden; /* 画面全体のスクロールを禁止 */
+    }
+    .pos-container {
+        flex-direction: column;
+        width: 95vw; /* 縦画面の幅 */
+        height: 90vh; /* 縦画面の高さ */
+        margin-top: 0.5px; /* ヘッダーの高さ分下げる */
+        border-radius: 8px;
+        box-shadow: none;
+        position: absolute; /* 画面に対して固定 */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* 中央配置 */
+        overflow: hidden; /* コンテナ内のスクロールは子要素に任せる */
+    }
+
+    .order-panel {
+        width: 100%;
+        min-width: unset;
+        padding: 15px;
+        border-right: none;
+        border-bottom: 1px solid #BDC3C7;
+        height: 45%; /* pos-containerの45% */
+        flex-shrink: 0;
+    }
+    .order-list {
+        flex-grow: 1; /* 残りのスペースを占有 */
+        overflow-y: auto; /* 注文リストをスクロール可能に */
+        margin-bottom: 20px;
+    }
+
+    .menu-panel {
+        width: 100%;
+        min-width: unset;
+        padding: 10px;
+        height: 55%; /* pos-containerの55% */
+        flex-grow: 1;
+        overflow-y: auto; /* menu-panelをスクロール可能に */
+    }
+
+    .product-group {
+        grid-template-columns: repeat(5, 1fr); /* 横画面と同じ5列レイアウト */
+        gap: 10px;
+    }
+    .product-category-button,
+    .product-button {
+        aspect-ratio: 1 / 1;
+        font-size: 0.75em; /* フォントサイズをさらに調整 */
+        white-space: normal; /* テキストの折り返しを許可 */
+        word-break: break-all; /* 単語の途中でも改行を許可 */
+        line-height: 1.2; /* 行間を調整 */
+        padding: 2px; /* パディングを調整 */
+    }
+
+    .product-category-button {
+        grid-column: span 1; /* 横画面と同じ */
+        font-size: 0.9em;
+    }
+    
+    .product-button.empty {
+        border: none;
+        box-shadow: none;
+        cursor: default;
+        background-color: transparent;
+    }
+    .product-button.empty.transparent {
+        background-color: transparent;
+        border: none;
+        box-shadow: none;
+    }
+    .product-button.empty:hover {
+        background-color: transparent;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .action-buttons .btn {
+        font-size: 1em;
+        padding: 12px 15px;
+    }
+    .btn-pay {
+        margin-right: 5px;
+        margin-left: 5px;
+    }
+    .btn-cancel {
+        margin-right: 5px;
+        margin-left: 5px;
+    }
+
+    /* 履歴コンテナの調整 */
+    .history-container {
+        width: 95%;                      /* pos-containerと同じ幅 */
+        max-width: unset;
+        height: calc(100vh - 100px);     /* pos-containerと同じ高さ */
+        margin-top: 0.5px;               /* pos-containerと同じmargin-top */
+        border-radius: 8px;
+        box-shadow: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        overflow: hidden;
+    }
+
+    /* メニュー設定コンテナの調整 */
+    .menu-settings-container {
+        width: 95%;
+        max-width: unset;
+        height: calc(100vh - 100px);
+        margin-top: 0.5px;
+        border-radius: 8px;
+        box-shadow: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        overflow: hidden;
+    }
+
+    .menu-item-form {
+        grid-template-columns: 1fr; /* 縦画面では1列にする */
+    }
+    .form-actions {
+        grid-column: span 1; /* 1列になったので調整 */
+        justify-content: center; /* ボタンを中央寄せ */
+    }
+
+
+    /* ヘッダーのレスポンシブ調整 */
+    .app-header {
+        padding: 10px 15px;
+    }
+    .header-title {
+        font-size: 1.2em;
+    }
+    .hamburger-menu {
+        width: 25px;
+        height: 20px;
+    }
+    .hamburger-menu .line {
+        height: 2px;
+    }
+    .hamburger-menu.open .line:nth-child(1) {
+        transform: translateY(9px) rotate(45deg);
+    }
+    .hamburger-menu.open .line:nth-child(3) {
+        transform: translateY(-9px) rotate(-45deg);
+    }
+    .side-menu {
+        padding-top: 60px;
+    }
+}
+
+@media (orientation: landscape) { /* 横画面のとき */
+    body {
+        overflow: hidden; /* 画面全体のスクロールを禁止 */
+    }
+    .pos-container {
+        width: 80%; /* 横画面の幅 */
+        height: 80vh; /* 横画面の高さ */
+        position: fixed; /* 画面に対して固定 */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); /* 中央配置 */
+    }
+}
+
+/* product-category-buttonとproduct-buttonの幅を調整 */
+.product-group {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    flex-shrink: 0;
+    /* product-category-buttonとproduct-buttonの幅はgridが自動計算するため、widthプロパティは不要 */
+}
