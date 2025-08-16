@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POSレジシステム - 注文管理</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+</head>
+<body>
+    <header class="app-header">
+        <button class="hamburger-menu" id="hamburgerMenu">
+            <span class="line"></span>
+            <span class="line"></span>
+            <span class="line"></span>
+        </button>
+        <h1 class="header-title">社交喫茶 知恵の庭 - 注文管理</h1>
+    </header>
+
+    <nav class="side-menu" id="sideMenu">
+        <ul>
+            <li><a href="index.html" class="menu-item">POSレジ</a></li>
+            <li><a href="order_management.html" class="menu-item active">注文管理</a></li>
+            <li><a href="menu_settings.html" class="menu-item">メニュー設定</a></li>
+        </ul>
+    </nav>
+    <div class="overlay" id="overlay"></div>
+
+    <div class="order-management-container">
+        <h2 class="order-management-title">注文管理一覧</h2>
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">全て</button>
+            <button class="filter-btn" data-filter="pending">未提供</button>
+            <button class="filter-btn" data-filter="delivered">提供済み</button>
+            <button class="filter-btn" data-filter="cancelled">キャンセル</button>
+        </div>
+        <div id="orderManagementList" class="order-management-list">
+            <!-- 注文がここに表示されます -->
+        </div>
+    </div>
+
+    <script src="order_management.js"></script>
+</body>
+</html>

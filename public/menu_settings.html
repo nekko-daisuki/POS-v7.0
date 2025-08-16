@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POSレジシステム - メニュー設定</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <link rel="apple-touch-startup-image" href="/splash_screens/splash-2048x2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <script>
+        if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')
+              .then(registration => {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+              })
+              .catch(err => {
+                console.log('ServiceWorker registration failed: ', err);
+              });
+          });
+        }
+      </script>
+</head>
+<body>
+    <header class="app-header">
+        <button class="hamburger-menu" id="hamburgerMenu">
+            <span class="line"></span>
+            <span class="line"></span>
+            <span class="line"></span>
+        </button>
+        <h1 class="header-title">社交喫茶 知恵の庭 - メニュー設定</h1>
+    </header>
+
+    <nav class="side-menu" id="sideMenu">
+        <ul>
+            <li><a href="index.html" class="menu-item">POSレジ</a></li>
+            <li><a href="order_management.html" class="menu-item">注文管理</a></li>
+            <li><a href="menu_settings.html" class="menu-item active">メニュー設定</a></li>
+        </ul>
+    </nav>
+    <div class="overlay" id="overlay"></div>
+
+    <div class="menu-settings-container">
+        <h2 class="settings-title">メニュー設定</h2>
+
+        
+
+        <div class="settings-section">
+            <h3>既存のメニュー</h3>
+            <div id="currentMenuItems" class="current-menu-items">
+                </div>
+        </div>
+        <div class="settings-actions">
+            <button class="btn btn-back" id="backToPosBtn">POSレジに戻る</button>
+        </div>
+    </div>
+
+    <script src="menu_settings.js"></script>
+</body>
+</html>

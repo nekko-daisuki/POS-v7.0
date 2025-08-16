@@ -1,0 +1,18 @@
+id, name, price, category
+lightRoast, 浅煎り,400, coffee
+darkRoast, 深煎り,400, coffee
+premium, プレミアム,500, coffee
+decaf, デカフェ,400, coffee
+iceCoffee, アイスコーヒー,400, coffee
+iceLatte, アイスカフェオレ,450, coffee
+lemonade, レモネード,300, softDrink
+appleJuice, アップルジュース,300, softDrink
+icedTea, アイスティー,300, softDrink
+milk, アイスミルク,300, softDrink
+chocolate, チョコレート,150, food
+cookie, クッキー,150, food
+madeleine, マドレーヌ,150, food
+financier, フィナンシェ,150, food
+dip, ディップ,200, other
+dipx5, ディップ ×5,1000, other
+sticker, ステッカー,100, other
