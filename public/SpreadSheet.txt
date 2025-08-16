@@ -1,4 +1,0 @@
-スプレッドシートのid
-1V2YyBjvv2P3N-quLNDZIaDwlKPIKIUXNTjuv6dvAzKc
-
-GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyhBPZIhCrhHlOIdYaie60SG5Wxd8ODt1LhuPVd8ZcnsjdHRoDm_XrzuIDEbXVHsI5W/exec"
