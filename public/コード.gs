@@ -1,340 +1,162 @@
 /**
- * POSTリクエストを処理する関数
+ * ===== 設定 =====
+ * データを書き込むスプレッドシート
+ */
+const SPREADSHEET_ID = "YOUR_SPREADSHEET_ID_HERE";
+
+/**
+ * シート名
+ */
+const SHEET_SUMMARY = "会計サマリー";
+const SHEET_SALES   = "売上データ";
+
+/**
+ * タイムゾーン（JST）
+ */
+const TZ = "Asia/Tokyo";
+
+/**
+ * Webアプリ：POSTで受け取り
+ * 期待ペイロード（JSON）:
+ * {
+ *   orderId: string,
+ *   timestamp: ISO string,
+ *   tableNumber: string,
+ *   totalItems: number,
+ *   totalAmount: number,
+ *   tendered: number,
+ *   change: number,
+ *   itemsText: string,
+ *   defaultStatus: string,
+ *   items: [{ id, name, price, quantity, subtotal }]
+ * }
  */
 function doPost(e) {
   try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return json({ ok: false, error: "No payload" });
+    }
     const data = JSON.parse(e.postData.contents);
 
-    // アクションに応じて処理を分岐
-    if (data.action === "updateStatus") {
-      return updateOrderStatus(data);
-    } else {
-      return saveOrder(data);
-    }
-  } catch (error) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ success: false, error: error.toString() })
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-}
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    const sum = ss.getSheetByName(SHEET_SUMMARY) || ss.insertSheet(SHEET_SUMMARY);
+    const det = ss.getSheetByName(SHEET_SALES)   || ss.insertSheet(SHEET_SALES);
 
-/**
- * 注文データをスプレッドシートに保存する
- */
-function saveOrder(data) {
-  let ss;
-  try {
-    Logger.log(
-      "Attempting to open spreadsheet with ID: 1V2YyBjvv2P3N-quLNDZIaDwlKPIKIUXNTjuv6dvAzKc"
-    );
-    ss = SpreadsheetApp.openById(
-      "1V2YyBjvv2P3N-quLNDZIaDwlKPIKIUXNTjuv6dvAzKc"
-    );
-    Logger.log("Spreadsheet opened successfully: " + ss.getName());
-  } catch (e) {
-    Logger.log("Error opening spreadsheet: " + e.toString()); // Log error if opening fails
-    throw e; // Re-throw to be caught by doPost's try/catch
-  }
+    ensureSummaryHeader_(sum);
+    ensureSalesHeader_(det);
 
-  let salesSheet = ss.getSheetByName("売上データ");
-  if (!salesSheet) {
-    Logger.log('Sheet "売上データ" not found. Creating it.');
-    salesSheet = ss.insertSheet("売上データ");
-  }
-  Logger.log("Sales sheet obtained: " + salesSheet.getName());
+    // JST日時表記に整形
+    const tsJst = Utilities.formatDate(new Date(data.timestamp || new Date()), TZ, "yyyy/MM/dd HH:mm:ss");
 
-  // ヘッダー行の確認と設定
-  if (salesSheet.getLastRow() === 0) {
-    Logger.log("Sales sheet is empty. Appending headers.");
-    salesSheet.appendRow([
-      "ID",
-      "日時",
-      "テーブル番号",
-      "商品名",
-      "単価",
-      "数量",
-      "小計",
-      "ステータス",
-    ]);
-    salesSheet.setColumnWidth(1, 150); // ID
-    salesSheet.setColumnWidth(2, 180); // 日時
-    salesSheet.setColumnWidth(3, 100); // テーブル番号
-    salesSheet.setColumnWidth(4, 150); // 商品名
-    salesSheet.setColumnWidth(8, 100); // ステータス
-    Logger.log("Headers appended.");
-  }
-
-  const timestamp = new Date();
-  const orderIdBase = timestamp.getTime();
-
-  data.items.forEach(function (item, index) {
-    const uniqueId = `${orderIdBase}_${index}`;
-    const rowData = [
-      uniqueId,
-      timestamp,
-      data.tableNumber,
-      item.name,
-      item.price,
-      item.quantity,
-      item.price * item.quantity,
-      "pending",
+    // ========== 会計サマリー 1行追記 ==========
+    // 列構成（固定）: [注文ID, 日時, テーブル番号, 合計点数, 合計金額, 預かり金額, お釣り, 注文内容]
+    const summaryRow = [
+      String(data.orderId || ""),
+      tsJst,
+      String(data.tableNumber || ""),
+      toNumber_(data.totalItems),
+      toNumber_(data.totalAmount),
+      toNumber_(data.tendered),
+      toNumber_(data.change),
+      String(data.itemsText || "")
     ];
-    Logger.log(
-      "Attempting to append row to sales sheet: " + JSON.stringify(rowData)
-    );
-    salesSheet.appendRow(rowData);
-    Logger.log("Row appended to sales sheet.");
-  });
+    sum.appendRow(summaryRow);
 
-  // 会計サマリー情報も記録
-  const summarySheet =
-    ss.getSheetByName("会計サマリー") || ss.insertSheet("会計サマリー");
-  if (summarySheet.getLastRow() === 0) {
-    summarySheet.appendRow([
-      "日時",
-      "テーブル番号",
-      "合計点数",
-      "合計金額",
-      "預かり金額",
-      "お釣り",
-      "注文内容",
-    ]);
-    summarySheet.setColumnWidth(1, 180);
-    summarySheet.setColumnWidth(2, 100);
-    summarySheet.setColumnWidth(7, 300);
-  }
-
-  const orderDetails = data.items
-    .map((item) => `${item.name} x${item.quantity}`)
-    .join(", ");
-  summarySheet.appendRow([
-    timestamp,
-    data.tableNumber,
-    data.totalCount,
-    data.totalAmount,
-    data.receivedAmount,
-    data.changeAmount,
-    orderDetails,
-  ]);
-
-  return ContentService.createTextOutput(
-    JSON.stringify({ success: true, message: "注文データを保存しました" })
-  ).setMimeType(ContentService.MimeType.JSON);
-}
-
-/**
- * 注文のステータスを更新する
- */
-function updateOrderStatus(data) {
-  const ss = SpreadsheetApp.openById(
-    "1V2YyBjvv2P3N-quLNDZIaDwlKPIKIUXNTjuv6dvAzKc"
-  );
-  const sheet = ss.getSheetByName("売上データ");
-  const dataRange = sheet.getDataRange();
-  const values = dataRange.getValues();
-
-  // IDに基づいて行を検索 (ヘッダーはスキップ)
-  for (let i = 1; i < values.length; i++) {
-    if (values[i][0] == data.uniqueId) {
-      // IDが一致
-      sheet.getRange(i + 1, 8).setValue(data.newStatus); // ステータス列（8番目）を更新
-      return ContentService.createTextOutput(
-        JSON.stringify({ success: true, message: "ステータスを更新しました" })
-      ).setMimeType(ContentService.MimeType.JSON);
-    }
-  }
-
-  return ContentService.createTextOutput(
-    JSON.stringify({ success: false, message: "対象の注文が見つかりません" })
-  ).setMimeType(ContentService.MimeType.JSON);
-}
-
-/**
- * GETリクエストを処理する関数
- */
-function doGet(e) {
-  try {
-    switch (e.parameter.action) {
-      case "getMenu":
-        return getMenuItems();
-      case "getOrders":
-        return getOrders();
-      default:
-        return ContentService.createTextOutput(
-          JSON.stringify({ status: "active", message: "API is active" })
-        ).setMimeType(ContentService.MimeType.JSON);
-    }
-  } catch (error) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ success: false, error: error.toString() })
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-/**
- * 注文履歴をスプレッドシートから取得する
- */
-function getOrders() {
-  const ss = SpreadsheetApp.openById(
-    "1V2YyBjvv2P3N-quLNDZIaDwlKPIKIUXNTjuv6dvAzKc"
-  );
-  const sheet = ss.getSheetByName("売上データ");
-  if (!sheet) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ success: true, data: [] })
-    ).setMimeType(ContentService.MimeType.JSON);
-  }
-
-  const data = sheet.getDataRange().getValues();
-  const headers = data.shift() || [];
-
-  const orders = data.map(function (row) {
-    const orderItem = {};
-    headers.forEach(function (header, index) {
-      orderItem[header] = row[index];
-    });
-    return orderItem;
-  });
-
-  return ContentService.createTextOutput(
-    JSON.stringify({ success: true, data: orders })
-  ).setMimeType(ContentService.MimeType.JSON);
-}
-
-/**
- * 日次売上レポートを生成する関数（時間トリガーで実行可能）
- */
-function generateDailyReport() {
-  var ss = SpreadsheetApp.openById(
-    "1V2YyBjvv2P3N-quLNDZIaDwlKPIKIUXNTjuv6dvAzKc"
-  );
-  var salesSheet = ss.getSheetByName("売上データ");
-  var reportSheet =
-    ss.getSheetByName("日次レポート") || ss.insertSheet("日次レポート");
-
-  // 今日の日付を取得
-  var today = new Date();
-  var yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-
-  // 日付フォーマット (yyyyMMdd)
-  var dateString = Utilities.formatDate(yesterday, "Asia/Tokyo", "yyyyMMdd");
-
-  // 売上データのすべての行を取得
-  var allData = salesSheet.getDataRange().getValues();
-
-  // ヘッダー行をスキップ
-  var data = allData.slice(1);
-
-  // 昨日の売上データをフィルタリング
-  var yesterdaySales = data.filter(function (row) {
-    var rowDate = new Date(row[1]); // Corrected: Index 1 for timestamp
-    return (
-      Utilities.formatDate(rowDate, "Asia/Tokyo", "yyyyMMdd") === dateString
-    );
-  });
-
-  // 商品ごとの売上集計
-  var salesByProduct = {};
-  yesterdaySales.forEach(function (row) {
-    var productName = row[3]; // Corrected: Index 3 for product name
-    var quantity = row[5]; // Corrected: Index 5 for quantity
-    var subtotal = row[6]; // Corrected: Index 6 for subtotal
-
-    if (!salesByProduct[productName]) {
-      salesByProduct[productName] = {
-        quantity: 0,
-        amount: 0,
-      };
+    // ========== 売上データ 複数行追記 ==========
+    // 列構成（固定）: [ID, 日時, テーブル番号, 商品名, 単価, 数量, 小計, ステータス]
+    const items = Array.isArray(data.items) ? data.items : [];
+    if (items.length > 0) {
+      const status = String(data.defaultStatus || "未提供");
+      const rows = items.map((it) => ([
+        String(data.orderId || ""),
+        tsJst,
+        String(data.tableNumber || ""),
+        String(it.name || ""),
+        toNumber_(it.price),
+        toNumber_(it.quantity),
+        toNumber_(it.subtotal != null ? it.subtotal : (toNumber_(it.price) * toNumber_(it.quantity))),
+        status
+      ]));
+      // まとめて書き込みで高速化
+      det.getRange(det.getLastRow() + 1, 1, rows.length, rows[0].length).setValues(rows);
     }
 
-    salesByProduct[productName].quantity += quantity;
-    salesByProduct[productName].amount += subtotal;
-  });
-
-  // レポートシートにデータを追加
-  reportSheet.clear();
-  reportSheet.appendRow(["日次売上レポート " + dateString]);
-  reportSheet.appendRow([""]);
-  reportSheet.appendRow(["商品名", "販売数", "売上金額"]);
-
-  var totalAmount = 0;
-
-  // 商品ごとの売上を追加
-  Object.keys(salesByProduct).forEach(function (product) {
-    reportSheet.appendRow([
-      product,
-      salesByProduct[product].quantity,
-      salesByProduct[product].amount,
-    ]);
-
-    totalAmount += salesByProduct[product].amount;
-  });
-
-  reportSheet.appendRow([""]);
-  reportSheet.appendRow(["合計", "", totalAmount]);
-
-  // レポートの書式を整える
-  reportSheet.getRange(1, 1).setFontWeight("bold").setFontSize(14);
-  reportSheet
-    .getRange(3, 1, 1, 3)
-    .setFontWeight("bold")
-    .setBackground("#D9D9D9");
-  reportSheet.getRange("C:C").setNumberFormat("¥#,##0");
-
-  // 全体の列幅を調整
-  reportSheet.setColumnWidth(1, 200);
-  reportSheet.setColumnWidth(2, 100);
-  reportSheet.setColumnWidth(3, 120);
-
-  Logger.log("日次レポートを生成しました: " + dateString);
+    return json({ ok: true, orderId: data.orderId, wroteSummary: 1, wroteSales: items.length });
+  } catch (err) {
+    return json({ ok: false, error: String(err && err.message || err) });
+  }
 }
 
 /**
- * メニューデータをスプレッドシートから取得する関数
+ * レスポンス(JSON)
  */
-function getMenuItems() {
-  try {
-    var ss = SpreadsheetApp.openById(
-      "1V2YyBjvv2P3N-quLNDZIaDwlKPIKIUXNTjuv6dvAzKc"
-    );
-    var sheet = ss.getSheetByName("メニュー");
+function json(obj) {
+  const out = ContentService.createTextOutput(JSON.stringify(obj));
+  out.setMimeType(ContentService.MimeType.JSON);
+  return out;
+}
 
-    if (!sheet) {
-      throw new Error("「メニュー」シートが見つかりません");
-    }
+/**
+ * 数値正規化
+ */
+function toNumber_(v) {
+  if (v === null || v === undefined || v === "") return 0;
+  const n = Number(v);
+  return isNaN(n) ? 0 : n;
+}
 
-    var data = sheet.getDataRange().getValues();
-    var headers = data.shift(); // ヘッダー行を取得
-
-    var menuItems = {};
-
-    data.forEach(function (row) {
-      var item = {};
-      headers.forEach(function (header, index) {
-        item[header] = row[index];
-      });
-
-      // カテゴリごとに分類
-      var category = item.category;
-      if (!menuItems[category]) {
-        menuItems[category] = [];
-      }
-      menuItems[category].push(item);
-    });
-
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: true,
-        data: menuItems,
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
-  } catch (error) {
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: false,
-        error: error.toString(),
-      })
-    ).setMimeType(ContentService.MimeType.JSON);
+/**
+ * 会計サマリーのヘッダを保証
+ * A:注文ID B:日時 C:テーブル番号 D:合計点数 E:合計金額 F:預かり金額 G:お釣り H:注文内容
+ */
+function ensureSummaryHeader_(sheet) {
+  const expected = ["注文ID","日時","テーブル番号","合計点数","合計金額","預かり金額","お釣り","注文内容"];
+  const range = sheet.getRange(1, 1, 1, expected.length);
+  const values = range.getValues()[0];
+  const need = values.some((v, i) => String(v || "") !== expected[i]);
+  if (sheet.getLastRow() === 0 || need) {
+    range.setValues([expected]);
+    sheet.setFrozenRows(1);
   }
+}
+
+/**
+ * 売上データのヘッダを保証
+ * A:ID B:日時 C:テーブル番号 D:商品名 E:単価 F:数量 G:小計 H:ステータス
+ */
+function ensureSalesHeader_(sheet) {
+  const expected = ["ID","日時","テーブル番号","商品名","単価","数量","小計","ステータス"];
+  const range = sheet.getRange(1, 1, 1, expected.length);
+  const values = range.getValues()[0];
+  const need = values.some((v, i) => String(v || "") !== expected[i]);
+  if (sheet.getLastRow() === 0 || need) {
+    range.setValues([expected]);
+    sheet.setFrozenRows(1);
+  }
+}
+
+/**
+ * （任意）メニューから使える簡易テスト
+ * 実行→ログで確認
+ */
+function testAppend_() {
+  const dummy = {
+    orderId: "TEST-" + new Date().getTime(),
+    timestamp: new Date().toISOString(),
+    tableNumber: "A1",
+    totalItems: 3,
+    totalAmount: 1220,
+    tendered: 2000,
+    change: 780,
+    itemsText: "ホットコーヒー×2 (¥300), ケーキ×1 (¥500)",
+    defaultStatus: "未提供",
+    items: [
+      { id: "coffee", name: "ホットコーヒー", price: 300, quantity: 2, subtotal: 600 },
+      { id: "cake",   name: "ケーキ",       price: 500, quantity: 1, subtotal: 500 },
+      { id: "tip",    name: "サービス",     price: 120, quantity: 1, subtotal: 120 },
+    ]
+  };
+  const e = { postData: { contents: JSON.stringify(dummy) } };
+  const res = doPost(e);
+  Logger.log(res.getContent());
 }
