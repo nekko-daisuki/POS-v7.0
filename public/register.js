@@ -342,35 +342,24 @@ document.addEventListener('DOMContentLoaded', function () {
             totalCount: totalCount,
         };
 
-        // 先に完了画面を表示
-        const changeAmount = receivedAmount - totalAmount;
-        changeAmountDisplay.textContent = `¥${changeAmount}`;
-        orderNumberDisplay.textContent = '処理中...';
-        paymentScreen.classList.add('hidden');
-        completionScreen.classList.remove('hidden');
-
         try {
-            // 裏側でスプレッドシートに保存
             const { orderNumber } = await saveToSpreadsheet(snapshot);
-            orderNumberDisplay.textContent = orderNumber;
+            const changeAmount = receivedAmount - totalAmount;
 
             // UIリセット
             orderItems = [];
             currentTableNumber = '';
             tableNumberDisplay.textContent = '';
-            receivedAmount = 0;
             updateOrderList();
-            updatePaymentDisplay();
+            paymentScreen.classList.add('hidden');
 
+            alert(`支払いが完了しました。
+注文番号: ${orderNumber}
+おつり：¥${changeAmount}`);
         } catch (err) {
             console.error(err);
-            orderNumberDisplay.textContent = '保存失敗';
             alert('注文データの保存に失敗しました。ネットワーク接続やGASの設定を確認してください。');
         }
-    });
-
-    closeCompletionScreenBtn.addEventListener('click', function () {
-        completionScreen.classList.add('hidden');
     });
 
     // 初期ロード
