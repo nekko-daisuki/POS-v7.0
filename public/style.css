@@ -1279,3 +1279,46 @@ body {
     flex-shrink: 0;
     /* product-category-buttonとproduct-buttonの幅はgridが自動計算するため、widthプロパティは不要 */
 }
+
+.completion-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.completion-container {
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 10px;
+  text-align: center;
+  width: 80%;
+  max-width: 500px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.completion-container h2 {
+  margin-top: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.completion-container p {
+  font-size: 18px;
+  color: #555;
+  margin: 20px 0;
+}
+
+.order-number-container {
+  font-weight: bold;
+}
+
+.completion-screen.hidden {
+  display: none;
+}
